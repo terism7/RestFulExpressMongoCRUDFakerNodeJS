@@ -2,12 +2,15 @@ const express =  require('express')
 const port = process.env.PORT || 7777
 const app = express()
 const bodyParser = require('body-parser');
-const users = require('./data/users');
-const mongojs = require('./db');
-const db = mongojs.connect;
-const Faker = require('Faker')
+const Faker = require('Faker');
 
-// parse application/json
+/* Connect MongoDB */
+const mongojs = require('mongojs');
+const databaseUrl = 'resful';
+const collections = ['users', 'clubs'];
+const db = mongojs(databaseUrl, collections);
+
+/* parse application/json ทำให้รับ Parameter body JSON ได้ */
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
       extended: true
@@ -15,7 +18,6 @@ app.use(bodyParser.urlencoded({
 
 app.get('/', (req,res) => {
       db.users.count(function (err, result) {
-            
             var add = result + 5;
             for (var i = result + 1; i <= add ; i++){
                   var json = {
@@ -26,15 +28,9 @@ app.get('/', (req,res) => {
                         ,"position": Faker.Address.city()
                   };
                   db.users.insert(json, function (err, docs) {
-
                   });
-                  
             }
             res.send(json);
-            // if (result <= 0) {
-            //       
-            // }
-            
       });
 })
 
@@ -63,7 +59,6 @@ app.post('/newuser', function (req, res) {
             if (err) throw err;
             res.send('Add new ' + docs.name + ' Completed!');
       });
-
 });
 
 app.get('/user/update/:id', function (req, res) {
